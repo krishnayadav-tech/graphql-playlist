@@ -7,7 +7,8 @@ const {
     GraphQLSchema,
     GraphQLID,
     GraphQLInt,
-    GraphQLList
+    GraphQLList,
+    GraphQLInputObjectType
 } = graphql;
 
 // dummy data
@@ -32,6 +33,7 @@ const BookType = new GraphQLObjectType({
         id: { type: GraphQLID },
         name: { type: GraphQLString },
         genre: { type: GraphQLString },
+        authorId: {type: GraphQLID},
         author: {
             type: AuthorType,
             resolve(parent, args){
@@ -56,6 +58,16 @@ const AuthorType = new GraphQLObjectType({
     })
 });
 
+const bookInput = new GraphQLInputObjectType({
+    name: 'InputBook',
+    fields: ( ) => ({
+        id: { type: GraphQLID },
+        name: { type: GraphQLString },
+        genre: { type: GraphQLString },
+        authorId: {type: GraphQLString}
+    })
+})
+
 const RootQuery = new GraphQLObjectType({
     name: 'RootQueryType',
     fields: {
@@ -72,6 +84,20 @@ const RootQuery = new GraphQLObjectType({
             args: { id: { type: GraphQLID } },
             resolve(parent, args){
                 return _.find(authors, { id: args.id });
+            }
+        },
+        getAllBooks:{
+            type: new GraphQLList(BookType) ,
+            resolve(parent,args){
+                return books;
+            }
+        },
+        addABook:{
+            type: GraphQLString,
+            args: {inputBook: {type: bookInput}},
+            resolve(parent,args){
+                books.push(args.inputBook);
+                return 'fuck off'
             }
         }
     }
